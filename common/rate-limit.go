@@ -3,6 +3,7 @@ package common
 import (
 	"fmt"
 	"io"
+	"time"
 
 	"github.com/palantir/pkg/cli"
 	"github.com/palantir/pkg/cli/flag"
@@ -29,6 +30,6 @@ func doRateLimit(params GitHubParams, stdout io.Writer) error {
 		return errors.Wrapf(err, "failed to get rate limits")
 	}
 	fmt.Fprintf(stdout, "Remaining requests: %d/%d\n", limits.Core.Remaining, limits.Core.Limit)
-	fmt.Fprintf(stdout, "Rate limit resets:  %v\n", limits.Core.Reset.Format("15:04:05 MST Mon Jan 2 2006"))
+	fmt.Fprintf(stdout, "Rate limit resets:  %s (in %.0f minutes)\n", limits.Core.Reset.Format("15:04:05 MST Mon Jan 2 2006"), limits.Core.Reset.Sub(time.Now()).Minutes())
 	return nil
 }
