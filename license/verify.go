@@ -56,7 +56,10 @@ func VerifyCorrect(client *github.Client, repo *github.Repository, authorName st
 		}
 		return github.RepositoryLicense{}, &repoLicenseError{ErrType: errorMissing, Message: msg}
 	}
+	return VerifyRepositoryLicenseCorrect(license, repo, authorName, cache)
+}
 
+func VerifyRepositoryLicenseCorrect(license *github.RepositoryLicense, repo *github.Repository, authorName string, cache Cache) (github.RepositoryLicense, error) {
 	// content of license currently in repository
 	actualLicenseBytes, err := base64.StdEncoding.DecodeString(*license.Content)
 	if err != nil {

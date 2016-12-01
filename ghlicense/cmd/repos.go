@@ -134,23 +134,8 @@ func doRepositoryLicense(params common.GitHubRepositoryParams, repos []string, c
 		}
 	}
 
-	if len(repos) == 0 {
-		if err := params.ProcessRepos(client, f); err != nil {
-			return errors.Wrapf(err, "failed to retrieve repositories")
-		}
-	} else {
-		for i, currRepo := range repos {
-			repo, _, err := client.Repositories.Get(params.RepositoryKey(), currRepo)
-			if err != nil {
-				return errors.Wrapf(err, "failed to retrieve repository %s for %s", currRepo, params.RepositoryKey())
-			}
-			if err := f(repo, repository.Progress{
-				CurrPageRepo:     i,
-				CurrPageNumRepos: len(repos),
-			}); err != nil {
-				return err
-			}
-		}
+	if err := params.ProcessRepos(client, repos, f); err != nil {
+		return err
 	}
 
 	if mode == verifyLicenses {
