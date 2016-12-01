@@ -281,8 +281,9 @@ func processSpec(params common.GitHubRepositoryParams, repos []string, specFile 
 			sort.Sort(repository.CaseInsensitiveStrings(keys))
 
 			for _, k := range keys {
+				errMsgParts = append(errMsgParts, fmt.Sprintf("\t%s:", k))
 				for _, v := range strings.Split(diffRepos[k], "\n") {
-					errMsgParts = append(errMsgParts, "\t"+v)
+					errMsgParts = append(errMsgParts, "\t\t"+v)
 				}
 			}
 		}

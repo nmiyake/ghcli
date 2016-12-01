@@ -1,6 +1,7 @@
 package spec
 
 import (
+	"fmt"
 	"io"
 	"strings"
 
@@ -39,14 +40,16 @@ func (d *licenseAnalyzer) Diff(def repository.Definition, info repository.Info) 
 	if info.License != nil && info.License.SPDXID != nil {
 		gotLicense = *info.License.SPDXID
 	}
+	if wantLicenseType == "" && gotLicense == "" {
+		return ""
+	}
 	if wantLicenseType != gotLicense {
 		// detected license type is different from specification
 		return stringDiff("license type", wantLicenseType, gotLicense)
 	}
-
 	if _, err := license.VerifyRepositoryLicenseCorrect(info.RepoLicense, &info.Repository, d.authorName, d.cache); license.IsIncorrect(err) {
 		// content of license differs from expectation
-		return joinDiff("license content", strings.Split(license.Diff(err), "\n")...)
+		return joinDiff(fmt.Sprintf("%s content (%s)", *info.RepoLicense.Path, *info.RepoLicense.License.Name), strings.Split(license.Diff(err), "\n")...)
 	}
 	return ""
 }
