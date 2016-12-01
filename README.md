@@ -158,10 +158,18 @@ Verifies that the repositories owned by a user or organization conform to the pr
 Verifying repository bar against definition (1/30, page 1/3)...OK
 Verifying repository foo against definition (2/30, page 1/3)...OK
 ...
-63 repositories OK
+60 repositories OK
         nmiyake/bar
-        nmiyake/foo
         ...
+1 repository differed from definition:
+        nmiyake/foo:
+                LICENSE content (Apache License 2.0):
+                        --- Expected
+                        +++ Actual
+                        @@ -189 +189 @@
+                        -   Copyright {yyyy} {name of copyright owner}
+                        +   Copyright 2016 Nick Miyake
+
 ```
 
 ### Apply
