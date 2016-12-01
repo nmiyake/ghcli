@@ -78,7 +78,7 @@ func (p *gitHubParams) CacheDir() string {
 type GitHubRepositoryParams interface {
 	GitHubParams
 	RepositoryKey() string
-	ProcessRepos(client *github.Client, f repository.ProcessFunc) error
+	ProcessRepos(client *github.Client, repos []string, f repository.ProcessFunc) error
 }
 
 type gitHubRepositoryParams struct {
@@ -94,11 +94,35 @@ func (p *gitHubRepositoryParams) RepositoryKey() string {
 	return p.user
 }
 
-func (p *gitHubRepositoryParams) ProcessRepos(client *github.Client, f repository.ProcessFunc) error {
-	if p.organization != "" {
-		return repository.ProcessOrgRepos(client, p.organization, f)
+func (p *gitHubRepositoryParams) ProcessRepos(client *github.Client, repos []string, f repository.ProcessFunc) error {
+	// if provided list of repos is empty, process all
+	if len(repos) == 0 {
+		var err error
+		if p.organization != "" {
+			err = repository.ProcessOrgRepos(client, p.organization, f)
+		} else {
+			err = repository.ProcessUserRepos(client, p.user, f)
+		}
+		if err != nil {
+			return errors.Wrapf(err, "failed to retrieve repositories")
+		}
+		return nil
 	}
-	return repository.ProcessUserRepos(client, p.user, f)
+
+	// otherwise, process provided repositories
+	for i, currRepo := range repos {
+		repo, _, err := client.Repositories.Get(p.RepositoryKey(), currRepo)
+		if err != nil {
+			return errors.Wrapf(err, "failed to retrieve repository %s for %s", currRepo, p.RepositoryKey())
+		}
+		if err := f(repo, repository.Progress{
+			CurrPageRepo:     i,
+			CurrPageNumRepos: len(repos),
+		}); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func NewGitHubParams(ctx cli.Context) GitHubParams {
