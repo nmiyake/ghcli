@@ -98,10 +98,10 @@ func GetInfo(client *github.Client, repo *github.Repository) (Info, error) {
 		}
 		return nil
 	}); err != nil {
-		if response == nil || response.StatusCode != 403 {
+		if response == nil || (response.StatusCode != http.StatusForbidden && response.StatusCode != http.StatusNotFound) {
 			return Info{}, errors.Wrapf(err, "failed to get collaborators for %s", *repo.FullName)
 		}
-		// if response code is 403, keep owners as nil
+		// if response code is 403 or 404, keep owners as nil
 	}
 	sort.Sort(CaseInsensitiveStrings(owners))
 
